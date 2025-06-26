@@ -23,7 +23,7 @@ export class LayoutReport extends Report {
 
     this.fonts = {
       header: { normal: 'Helvetica', strong: 'Helvetica-Bold' },
-      table: { normal: 'Courier', strong: 'Courier-Bold' }
+      table: { normal: 'Helvetica', strong: 'Helvetica-Bold' }
     };
 
     this.on('pageAdded', () => {

@@ -1,0 +1,59 @@
+<% head = { title: 'Mapa de vendas' } %>
+
+<h1 class="mb-4">Mapa de vendas</h1>
+
+<form action="/sales-map/report" method="get" target="_blank" class="d-flex flex-column gap-3">
+  <div class="row align-items-center">
+    <div class="col-2">
+      <label for="finalPeriod" class="required">Período</label>
+    </div>
+
+    <div class="col-5 row align-items-center">
+      <div class="col-5">
+        <input class="form-control" type="date" name="initialPeriod" id="initialPeriod" required>
+      </div>
+
+      <div class="col-1">
+        <span>a</span>
+      </div>
+
+      <div class="col-5">
+        <input class="form-control" type="date" name="finalPeriod" id="finalPeriod" required>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row align-items-center">
+    <div class="col-2">
+      <label for="detailBy">Detalhar por</label>
+    </div>
+
+    <div class="col-2">
+      <select class="form-select" name="detailBy" id="detailBy" required>
+        <option value="date">Data</option>
+        <option value="product">Produto</option>
+        <option value="customer">Cliente</option>
+        <option value="group">Grupo</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="row align-items-center">
+    <div class="col-2">
+      <label for="orderBy">Ordenar por</label>
+    </div>
+
+    <div class="col-2">
+      <select class="form-select" name="orderBy" id="orderBy" required>
+        <option value="id">Código</option>
+        <option value="detail">Detalhe</option>
+        <option value="quantity">Peças</option>
+        <option value="sales">Vendas</option>
+      </select>
+    </div>
+  </div>
+
+  <div>
+    <button class="btn btn-primary" type="submit">Gerar relatório</button>
+  </div>
+</form>

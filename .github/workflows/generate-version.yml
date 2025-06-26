@@ -1,0 +1,46 @@
+name: Gerar versão
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  generate-version:
+    if: github.actor != 'github-actions[bot]'  # Evita o loop
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Instalar dependências do Node
+        run: npm ci
+
+      - name: Incrementar versão patch (sem tag automática)
+        run: npm version patch --no-git-tag-version
+
+      - name: Obter nova versão
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Commitar nova versão
+        run: |
+          git add package.json package-lock.json
+          git commit -m "chore(develop): bump version to v${{ steps.version.outputs.version }}"
+
+      - name: Criar e enviar tag
+        run: |
+          git tag v${{ steps.version.outputs.version }}
+          git push origin develop --tags
+          git push

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= head.title || 'Luiza Reports' %></title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="shortcut icon" href="/images/favicon.svg" type="image/x-icon">
+
+    <% for(const css of head.css || []) { %>
+      <link rel="stylesheet" href="<%= css %>">
+    <% } %>
+
+    <style>
+      .required::after {
+        content: '*';
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar bg-primary" data-bs-theme="dark">
+      <div class="container-fluid">
+        <a class="navbar-brand fw-bold p-2 ms-5" href="/">Luiza Reports</a>
+      </div>
+    </nav>
+
+    <div class="container mt-4" style="min-height: 84.7vh;">
+      <%- body %>
+    </div>
+  </body>
+</html>

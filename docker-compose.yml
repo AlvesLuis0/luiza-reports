@@ -1,0 +1,21 @@
+services:
+  firebird:
+    image: jacobalberty/firebird:2.5-ss
+    environment:
+      ISC_PASSWORD: masterkey
+    ports:
+      - "3050:3050"
+    volumes:
+      - ${PWD}/storage:/var/lib/firebird/data
+    restart: unless-stopped
+  
+  application:
+    build: .
+    env_file:
+      - .env
+    environment:
+      FB_HOST: firebird
+    ports:
+      - "3000:3000"
+    depends_on:
+      - firebird

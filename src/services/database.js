@@ -1,14 +1,12 @@
 import dotenv from 'dotenv';
 import Firebird from 'node-firebird';
 import fs from 'fs';
+import { ROOT_PATH } from '../../config.js';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const STORAGE_PATH = path.resolve(__dirname, '../../storage', 'database.fdb');
+const STORAGE_PATH = path.resolve(ROOT_PATH, 'storage', 'database.fdb');
 const ORIGINAL_PATH = process.env.FB_DATABASE;
 
 function createDatabaseCopy() {

@@ -5,8 +5,6 @@ services:
       ISC_PASSWORD: masterkey
     ports:
       - "3050:3050"
-    volumes:
-      - ${PWD}/storage:/app/storage
     restart: unless-stopped
   
   application:
@@ -15,7 +13,6 @@ services:
       - .env
     environment:
       FB_HOST: firebird
-      FB_COPY_DATABASE: 0
     ports:
       - "3000:3000"
     depends_on:

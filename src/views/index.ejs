@@ -1,28 +1,30 @@
 <% head = {
-  title: 'Luiza Reports',
+  title: 'Luiza Micro',
   css: ['/css/datatables.min.css', '/css/datatables.bootstrap.min.css']
 } %>
 
-<h1 class="mb-4">Todos os relatórios</h1>
+<h1 class="mb-4">Todas as rotinas</h1>
 
-<table id="reports-table" class="table table-striped">
+<table id="routines-table" class="table table-striped">
   <thead>
     <tr>
-      <th>Relatório</th>
+      <th>Rotina</th>
       <th>Ações</th>
     </tr>
   </thead>
 
   <tbody>
-    <tr>
-      <td>Mapa de vendas</td>
-      <td><a href="/sales-map">Abrir</a></td>
-    </tr>
+    <% for(const routine of routines) { %>
+      <tr>
+        <td><%= routine.label %></td>
+        <td><a href="<%= routine.path %>">Abrir</a></td>
+      </tr>
+    <% } %>
   </tbody>
 </table>
 
 <script src="/js/jquery.min.js"></script>
 <script src="/js/datatables.min.js"></script>
 <script>
-  const table = new DataTable('#reports-table', { language: { url: '/i18n/datatables.json' } });
+  const table = new DataTable('#routines-table', { language: { url: '/i18n/datatables.json' } });
 </script>

@@ -58,7 +58,7 @@ export class LayoutReport extends Report {
   footer() {
     const oldCoordinates = [this.x, this.y];
     const newY = this.page.height - this.page.margins.bottom - 10;
-    const projectVersion = `Luiza Reports - Versão ${this.footerInfo.version}`;
+    const projectVersion = `Luiza Micro - Versão ${this.footerInfo.version}`;
 
     this
       .divider(newY - 4)

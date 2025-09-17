@@ -33,4 +33,34 @@ export class Database {
       });
     });
   }
+
+  static async transaction(callback) {
+    return new Promise((resolve, reject) => {
+      Firebird.attach(options, (err, db) => {
+        if (err) return reject(err);
+
+        db.transaction(Firebird.ISOLATION_READ_COMMITTED, async (err, transaction) => {
+          if (err) {
+            db.detach();
+            return reject(err);
+          }
+
+          try {
+            const result = await callback(transaction);
+
+            transaction.commit((err) => {
+              db.detach();
+              if (err) return reject(err);
+              resolve(result);
+            });
+          } catch (error) {
+            transaction.rollback(() => {
+              db.detach();
+              reject(error);
+            });
+          }
+        });
+      });
+    });
+  }
 }

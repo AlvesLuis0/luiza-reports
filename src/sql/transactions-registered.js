@@ -1,0 +1,1 @@
+export const transactionsRegisteredSql = 'SELECT identificador AS identifiers FROM titulos_cr_baixas_ofx';

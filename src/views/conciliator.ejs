@@ -1,0 +1,123 @@
+<% head = {
+  title:'Conciliador',
+  css: ['/css/datatables.min.css', '/css/datatables.bootstrap.min.css']
+} %>
+
+<h1 class="mb-4">Conciliador</h1>
+
+<form action="/conciliator/import-extract" method="post" class="d-flex flex-column gap-3">
+  <div class="row">
+    <div class="col-4">
+      <label for="files" class="required">Extratos no formato .ofx</label>
+      <input name="files" id="files" type="file" accept=".ofx" multiple class="form-control" required>
+    </div>
+  </div>
+
+  <div>
+    <button class="btn btn-primary" type="submit">Importar</button>
+  </div>
+</form>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col border">
+      <h3 class="text-center">Contas a receber</h3>
+      <table id="pending-transactions-table" class="table table-striped">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Nome</th>
+            <th>Valor</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="col border">
+      <h3 class="text-center">Extrato</h3>
+      <table id="extract-table" class="table table-striped">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Data</th>
+            <th>Descrição</th>
+            <th>Valor</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<script src="/js/jquery.min.js"></script>
+<script src="/js/datatables.min.js"></script>
+<script>
+  var imported = false;
+  const pendingCustomers = new DataTable('#pending-transactions-table', {
+    language: { url: '/i18n/datatables.json' },
+    columns: [
+      { data: 'id_cliente', orderable: false, searchable: false, render: (v) => `<input type="radio" name="radioGroup" class="row-radio" data-id="${v}">` },
+      { data: 'razao_social' },
+      { data: 'valor_residual', render: formatCurrency, searchable: false },
+    ]
+  });
+  const extract = new DataTable('#extract-table', {
+    language: { url: '/i18n/datatables.json' },
+    columns: [
+      { data: 'identificador', orderable: false, searchable: false, render: (v) => `<input type="checkbox" class="row-checkbox" data-id="${v}">` },
+      { data: 'data_emissao', render: formatDate },
+      { data: 'descricao' },
+      { data: 'valor', render: formatCurrency, searchable: false },
+    ]
+  });
+
+  $.ajax({
+    url: '/conciliator/pending-customers',
+    type: 'GET',
+    success: function(response) {
+      pendingCustomers.rows.add(response);
+      pendingCustomers.draw();
+    }
+  });
+
+
+  $('form').on('submit', importExtract);
+  async function importExtract(event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+
+    $.ajax({
+      url: '/conciliator/import-extract',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function(response) {
+        extract.rows.add(response);
+        extract.draw();
+        imported = true;
+      }
+    });
+  }
+
+
+  function formatCurrency(value) {
+    return value.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  function formatDate(date) {
+    return new Date(date).toLocaleDateString('pt-BR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  }
+</script>

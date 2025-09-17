@@ -1,16 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= head.title || 'Luiza Micro' %></title>
-    <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="shortcut icon" href="/images/favicon.svg" type="image/x-icon">
 
-    <% for(const css of head.css || []) { %>
-      <link rel="stylesheet" href="<%= css %>">
-    <% } %>
-
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/datatables.min.css">
+    <script src="/js/libs/bootstrap.bundle.min.js"></script>
+    <script src="/js/libs/pdfmake.min.js"></script>
+    <script src="/js/libs/vfs_fonts.js"></script>
+    <script src="/js/libs/datatables.min.js"></script>
+    <script src="/js/libs/dinero.min.js"></script>
+    
     <style>
       .required::after {
         content: '*';

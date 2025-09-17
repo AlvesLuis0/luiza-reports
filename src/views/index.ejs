@@ -1,7 +1,4 @@
-<% head = {
-  title: 'Luiza Micro',
-  css: ['/css/datatables.min.css', '/css/datatables.bootstrap.min.css']
-} %>
+<% head = { title: 'Luiza Micro' } %>
 
 <h1 class="mb-4">Todas as rotinas</h1>
 
@@ -23,8 +20,6 @@
   </tbody>
 </table>
 
-<script src="/js/jquery.min.js"></script>
-<script src="/js/datatables.min.js"></script>
 <script>
   const table = new DataTable('#routines-table', { language: { url: '/i18n/datatables.json' } });
 </script>

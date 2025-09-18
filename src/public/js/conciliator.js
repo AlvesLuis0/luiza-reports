@@ -30,6 +30,8 @@ $.ajax({
       .clear()
       .rows.add(response)
       .draw();
+    selectedPendingTotal = Dinero({ amount: 0 });
+      $('#selected-pending-total').text('R$ 0,00');
   }
 });
 
@@ -50,6 +52,8 @@ $('form').on('submit', function(event) {
         .clear()
         .rows.add(response)
         .draw();
+      selectedTransactionsTotal = Dinero({ amount: 0 });
+      $('#selected-extract-total').text('R$ 0,00');
     }
   });
 });

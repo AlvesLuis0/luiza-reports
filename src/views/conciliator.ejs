@@ -11,14 +11,21 @@
   </div>
 </form>
 
-<div class="row justify-content-between mt-3">
+<div class="row mt-3">
   <div class="col-1">
     <button id="action-btn" class="btn btn-success">Conciliar</button>
   </div>
+</div>
 
-  <div class="col-7 text-end fs-4">
+<div class="row justify-content-between mt-3">
+  <div class="col-6 fs-4">
+    <span class="fw-bold">Total selecionado no contas a pagar:</span>
+    <span id="selected-pending-total">R$ 0,00</span>
+  </div>
+
+  <div class="col-6 text-end fs-4">
     <span class="fw-bold">Total selecionado no extrato:</span>
-    <span id="selected-total">R$ 0,00</span>
+    <span id="selected-extract-total" style="color: red;">R$ 0,00</span>
   </div>
 </div>
 

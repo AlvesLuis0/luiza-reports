@@ -1,4 +1,5 @@
 const defaultColumnConfig = { orderable: false, searchable: false };
+var selectedPendingTotal = Dinero({ amount: 0 });
 var selectedTransactionsTotal = Dinero({ amount: 0 });
 
 
@@ -53,23 +54,33 @@ $('form').on('submit', function(event) {
   });
 });
 
-extract.on('select', function ( e, dt, type, indexes ) {
+pendingCustomers.on('select', function (_, dt, _, indexes) {
   const data = dt.row(indexes).data();
-  changeSelectedTotal(data.valor);
-} );
-extract.on('deselect', function ( e, dt, type, indexes ) {
+  selectedPendingTotal = Dinero({ amount: data.valor_residual * 100 });
+  $('#selected-pending-total').text(formatCurrency(selectedPendingTotal.getAmount() / 100));
+  checkExtractTotalColor();
+});
+pendingCustomers.on('deselect', function (_, _, _, _) {
+  selectedPendingTotal = Dinero({ amount: 0 });
+  $('#selected-pending-total').text(formatCurrency(selectedPendingTotal.getAmount() / 100));
+  checkExtractTotalColor();
+});
+extract.on('select', function (_, dt, _, indexes) {
   const data = dt.row(indexes).data();
-  changeSelectedTotal(-data.valor);
-} );
+  changeSelectedTransactionsTotal(data.valor);
+  checkExtractTotalColor();
+});
+extract.on('deselect', function (_, dt, _, indexes) {
+  const data = dt.row(indexes).data();
+  changeSelectedTransactionsTotal(-data.valor);
+  checkExtractTotalColor();
+});
 
 $('#action-btn').on('click', function() {
-  const pendingValue = Dinero({ amount: parseInt((pendingCustomers.row({ selected: true }).data() || {}).valor_residual * 100 || 0) });
+  if(selectedTransactionsTotal.isZero() || selectedPendingTotal.isZero()) return;
+  if(selectedTransactionsTotal.greaterThan(selectedPendingTotal)) return;
 
-  if(selectedTransactionsTotal.isZero() || pendingValue.isZero()) return;
-  if(selectedTransactionsTotal.greaterThan(pendingValue)) return;
-
-  console.log(pendingValue.getAmount());
-  console.log(selectedTransactionsTotal.getAmount());
+  // TODO
 });
 
 
@@ -87,8 +98,18 @@ function formatDate(date) {
   return `${day}/${month}/${year}`;
 }
 
-function changeSelectedTotal(value) {
+function changeSelectedTransactionsTotal(value) {
   selectedTransactionsTotal = selectedTransactionsTotal.add(Dinero({ amount: parseInt(value * 100) }));
   const total = selectedTransactionsTotal.getAmount() / 100;
-  $('#selected-total').text(formatCurrency(total));
+  $('#selected-extract-total').text(formatCurrency(total));
+}
+
+function checkExtractTotalColor() {
+  function isValid() {
+    if(selectedTransactionsTotal.isZero() || selectedPendingTotal.isZero()) return false;
+    if(selectedTransactionsTotal.greaterThan(selectedPendingTotal)) return false;
+    return true;
+  }
+  
+  $('#selected-extract-total').css('color', isValid() ? 'green' : 'red');
 }

@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { ImportExtractUseCase } from '../use-cases/import-extract-use-case.js';
+import { ImportExtractUseCase } from '../use-cases/import-extract.js';
 import { Database } from '../services/database.js';
 import { transactionsRegisteredSql } from '../sql/transactions-registered.js'
 import { pendingCustomersSql } from '../sql/pending-customers.js';
+import { PreConciliateUseCase } from '../use-cases/pre-conciliate.js';
 
 export const conciliatorController = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -27,4 +28,11 @@ conciliatorController.post('/import-extract', upload.array('files'), async(req, 
   }
 
   res.json(result)
+});
+
+conciliatorController.post('/pre-conciliate', async(req, res) => {
+  const conciliation = req.body;
+  const preConciliate = new PreConciliateUseCase(conciliation.customer, conciliation.total);
+  const history = await preConciliate.execute();
+  res.json({ ...conciliation, history });
 });

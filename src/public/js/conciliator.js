@@ -1,12 +1,15 @@
+// constantes e variáveis globais
 const defaultColumnConfig = { orderable: false, searchable: false };
 var selectedPendingTotal = Dinero({ amount: 0 });
 var selectedTransactionsTotal = Dinero({ amount: 0 });
 
 
+// tabelas
 const pendingCustomers = new DataTable('#pending-customers-table', {
   select: true,
   language: { url: '/i18n/datatables.json' },
   columns: [
+    { ...defaultColumnConfig, data: 'id_cliente', orderable: true },
     { ...defaultColumnConfig, data: 'razao_social', searchable: true, orderable: true },
     { ...defaultColumnConfig, data: 'valor_residual', render: formatCurrency },
   ]
@@ -22,6 +25,7 @@ const extract = new DataTable('#extract-table', {
 });
 
 
+// início
 $.ajax({
   url: '/conciliator/pending-customers',
   type: 'GET',
@@ -36,11 +40,11 @@ $.ajax({
 });
 
 
+// listeners
 $('#files').on('change', function() { $('form').submit() })
 $('form').on('submit', function(event) {
   event.preventDefault();
   const formData = new FormData(this);
-
   $.ajax({
     url: '/conciliator/import-extract',
     type: 'POST',
@@ -84,10 +88,23 @@ $('#action-btn').on('click', function() {
   if(selectedTransactionsTotal.isZero() || selectedPendingTotal.isZero()) return;
   if(selectedTransactionsTotal.greaterThan(selectedPendingTotal)) return;
 
-  // TODO
+  const customer = pendingCustomers.row({ selected: true }).data();
+  const total = selectedTransactionsTotal.getAmount() / 100;
+
+  $.ajax({
+    url: '/conciliator/pre-conciliate',
+    type: 'POST',
+    contentType: 'application/json',
+    processData: false,
+    data: JSON.stringify({ customer, total }),
+    success: function(response) {
+      console.log(response);
+    }
+  })
 });
 
 
+// utils
 function formatCurrency(value) {
   return value.toLocaleString('pt-BR', {
     style: 'currency',

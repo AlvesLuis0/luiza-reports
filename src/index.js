@@ -14,6 +14,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.resolve(ROOT_PATH, 'src', 'views'));
 app.set('layout', 'layout');
 app.use(expressEjsLayouts);
+app.use(express.json())
 
 app.use(express.static(path.resolve(ROOT_PATH, 'src', 'public')));
 

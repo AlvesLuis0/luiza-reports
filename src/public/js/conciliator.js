@@ -35,7 +35,7 @@ class DineroInput {
 
   setValue(value) {
     this.value = Dinero({ amount: parseInt(value * 100) })
-    this.input.text('R$ ' + formatCurrency(this.getValue()));
+    this.input.text(formatCurrency(this.getValue()));
   }
 }
 

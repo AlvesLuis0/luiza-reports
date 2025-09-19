@@ -38,5 +38,5 @@ function toNumber(value) {
 }
 
 async function getPendingTransactions(customer) {
-  return await Database.query(pendingTransactionsSql, [customer.id_cliente]);
+  return await Database.query(pendingTransactionsSql(), [customer.id_cliente]);
 }

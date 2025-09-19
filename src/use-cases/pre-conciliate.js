@@ -3,40 +3,63 @@ import { Database } from '../services/database.js';
 import { pendingTransactionsSql } from '../sql/pending-transactions.js';
 
 export class PreConciliateUseCase {
-  constructor(customer, total) {
+  constructor(customer, transactions) {
     this.customer = customer;
-    this.total = toMoney(total);
+    this.transactions = transactions;
   }
 
   async execute() {
     const pendingTransactions = await getPendingTransactions(this.customer);
-    const result = [];
+    const result = []
+    let i = 0;
 
-    for(const t of pendingTransactions) {
-      if(this.total.isZero()) break;
-      const value = toMoney(t.valor_residual);
+    for (const t of this.transactions) {
+      let remaining = money(t.valor);
 
-      if(this.total.greaterThanOrEqual(value)) {
-        result.push({ ...t, valor_final: 0 });
-        this.total = this.total.subtract(value);
-      } else {
-        result.push({ ...t, valor_final: toNumber(value.subtract(this.total)) })
-        this.total = toMoney(0);
+      while (remaining.greaterThan(money(0)) && i < pendingTransactions.length) {
+        const account = pendingTransactions[i];
+
+        if (money(account.valor_residual).lessThanOrEqual(money(0))) {
+          i++;
+          continue;
+        }
+
+        const outstandingBefore = money(account.valor_residual);
+        const settlementValue = outstandingBefore.lessThan(remaining) ? outstandingBefore : remaining;
+        const outstandingAfter = outstandingBefore.subtract(settlementValue);
+
+        result.push({
+          id_cliente: account.id_cliente,
+          razao_social: account.razao_social,
+          id_titulo_cr: account.id_titulo_cr,
+          data_vencimento: account.data_vencimento,
+          data_emissao: t.data_emissao,
+          valor_residual: toNumber(outstandingBefore),
+          valor_recebido: toNumber(settlementValue),
+          valor_total: toNumber(outstandingAfter)
+        });
+
+        account.valor_residual = toNumber(outstandingAfter);
+        remaining = remaining.subtract(settlementValue);
+
+        if (money(account.valor_residual).lessThanOrEqual(money(0))) {
+          i++;
+        }
       }
     }
 
-    return result;
+    return result
   }
 }
 
-function toMoney(value) {
-  return Dinero({ amount: parseInt(value * 100) });
+function money(value) {
+  return Dinero({ amount: parseInt(value * 100) })
 }
 
-function toNumber(value) {
-  return value.getAmount() / 100;
+function toNumber(dineroObj) {
+  return dineroObj.getAmount() / 100
 }
 
 async function getPendingTransactions(customer) {
-  return await Database.query(pendingTransactionsSql(), [customer.id_cliente]);
+  return await Database.query(pendingTransactionsSql, [customer.id_cliente]);
 }

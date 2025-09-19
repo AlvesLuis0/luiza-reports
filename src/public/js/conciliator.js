@@ -42,24 +42,21 @@ class DineroInput {
 
 // constantes e variáveis globais
 const defaultColumnConfig = { orderable: false, searchable: false };
-const selectedPendingTotal = new DineroInput('#selected-pending-total', 0);
+const selectedCustomerTotal = new DineroInput('#selected-customer-total', 0);
 const selectedTransactionsTotal = new DineroInput('#selected-extract-total', 0);
 
 
 // tabelas
-const pendingTransactions = new DataTable('#pending-transactions-table', {
+const pendingCustomersTable = new DataTable('#pending-customers-table', {
   select: true,
-  ordering: false,
   language: { url: '/i18n/datatables.json' },
   columns: [
-    { ...defaultColumnConfig, data: 'id_cliente' },
-    { ...defaultColumnConfig, data: 'razao_social', searchable: true },
-    { ...defaultColumnConfig, data: 'id_titulo_cr' },
-    { ...defaultColumnConfig, data: 'data_vencimento', render: formatDate },
+    { data: 'id_cliente' },
+    { data: 'razao_social' },
     { ...defaultColumnConfig, data: 'valor_residual', render: formatCurrency },
   ]
 });
-const extract = new DataTable('#extract-table', {
+const extractTable = new DataTable('#extract-table', {
   select: { style: 'multi' },
   ordering: false,
   language: { url: '/i18n/datatables.json' },
@@ -69,7 +66,7 @@ const extract = new DataTable('#extract-table', {
     { ...defaultColumnConfig, data: 'valor', render: formatCurrency },
   ]
 });
-const history = new DataTable('#history-table', {
+const historyTable = new DataTable('#history-table', {
   language: { url: '/i18n/datatables.json' },
   ordering: false,
   searching: false,
@@ -89,11 +86,11 @@ const history = new DataTable('#history-table', {
 
 // início
 $.ajax({
-  url: '/conciliator/pending-transactions',
+  url: '/conciliator/pending-customers',
   type: 'GET',
   success: (response) => {
-    selectedPendingTotal.setValue(0);
-    pendingTransactions
+    selectedCustomerTotal.setValue(0);
+    pendingCustomersTable
       .clear()
       .rows.add(response)
       .draw();
@@ -114,7 +111,7 @@ $('form').on('submit', function(event) {
     processData: false,
     success: function(response) {
       selectedTransactionsTotal.setValue(0);
-      extract
+      extractTable
         .clear()
         .rows.add(response)
         .draw();
@@ -122,51 +119,42 @@ $('form').on('submit', function(event) {
   });
 });
 
-pendingTransactions.on('select', function (_, dt, _, indexes) {
+pendingCustomersTable.on('select', function (_, dt, _, indexes) {
   const data = dt.row(indexes).data();
-  selectedPendingTotal.setValue(data.valor_residual);
+  selectedCustomerTotal.setValue(data.valor_residual);
 });
-pendingTransactions.on('deselect', function (_, _, _, _) {
-  selectedPendingTotal.setValue(0);
+pendingCustomersTable.on('deselect', function (_, _, _, _) {
+  selectedCustomerTotal.setValue(0);
 });
-extract.on('select', function (_, dt, _, indexes) {
+extractTable.on('select', function (_, dt, _, indexes) {
   const data = dt.row(indexes).data();
   changeSelectedTransactionsTotal(data.valor);
 });
-extract.on('deselect', function (_, dt, _, indexes) {
+extractTable.on('deselect', function (_, dt, _, indexes) {
   const data = dt.row(indexes).data();
   changeSelectedTransactionsTotal(-data.valor);
 });
 
 $('#action-btn').on('click', function() {
-  if(selectedTransactionsTotal.getDinero().isZero() || selectedPendingTotal.getDinero().isZero()) return;
-  if(selectedTransactionsTotal.getDinero().greaterThan(selectedPendingTotal.getDinero())) return;
+  if(selectedTransactionsTotal.getDinero().isZero() || selectedCustomerTotal.getDinero().isZero()) return;
+  if(selectedTransactionsTotal.getDinero().greaterThan(selectedCustomerTotal.getDinero())) return;
 
-  const pending = pendingTransactions.row({ selected: true }).data();
-  const transactions = extract.rows({ selected: true }).data().toArray();
-  let total = selectedPendingTotal.getDinero();
-  const result = [];
-  
-  for(const t of transactions) {
-    const value = Dinero({ amount: parseInt(t.valor * 100) });
-    const r = {
-      id_cliente: pending.id_cliente,
-      razao_social: pending.razao_social,
-      id_titulo_cr: pending.id_titulo_cr,
-      data_vencimento: pending.data_vencimento,
-      data_emissao: t.data_emissao,
-      valor_residual: total.getAmount() / 100,
-      valor_recebido: t.valor
-    };
-    total = total.subtract(value);
-    r.valor_total = total.getAmount() / 100;
-    result.push(r);
-  }
+  const customer = pendingCustomersTable.row({ selected: true }).data();
+  const transactions = extractTable.rows({ selected: true }).data().toArray();
 
-  history
-    .clear()
-    .rows.add(result)
-    .draw();
-  const modal = new bootstrap.Modal('#conciliator-modal', {});
-  modal.show();
+  $.ajax({
+    url: '/conciliator/pre-conciliate',
+    type: 'POST',
+    data: JSON.stringify({ customer, transactions }),
+    contentType: 'application/json',
+    processData: false,
+    success: function(response) {
+      historyTable
+        .clear()
+        .rows.add(response.history)
+        .draw();
+      const modal = new bootstrap.Modal('#conciliator-modal', {});
+      modal.show();
+    }
+  })
 });

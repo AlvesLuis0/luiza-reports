@@ -2,9 +2,9 @@ import { Router } from 'express';
 import multer from 'multer';
 import { ImportExtractUseCase } from '../use-cases/import-extract.js';
 import { Database } from '../services/database.js';
-import { transactionsRegisteredSql } from '../sql/transactions-registered.js'
+import { transactionsRegisteredSql } from '../sql/transactions-registered.js';
 import { PreConciliateUseCase } from '../use-cases/pre-conciliate.js';
-import { pendingTransactionsSql } from '../sql/pending-transactions.js';
+import { pendingCustomersSql } from '../sql/pending-customers.js';
 
 export const conciliatorController = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -13,8 +13,8 @@ conciliatorController.get('/', async(_, res) => {
   res.render('conciliator');
 });
 
-conciliatorController.get('/pending-transactions', async(_, res) => {
-  const result = await Database.query(pendingTransactionsSql(true));
+conciliatorController.get('/pending-customers', async(_, res) => {
+  const result = await Database.query(pendingCustomersSql);
   res.json(result);
 });
 
@@ -30,10 +30,9 @@ conciliatorController.post('/import-extract', upload.array('files'), async(req, 
   res.json(result)
 });
 
-// TODO: ver o que fazer com isso depois
 conciliatorController.post('/pre-conciliate', async(req, res) => {
   const conciliation = req.body;
-  const preConciliate = new PreConciliateUseCase(conciliation.customer, conciliation.total);
+  const preConciliate = new PreConciliateUseCase(conciliation.customer, conciliation.transactions);
   const history = await preConciliate.execute();
   res.json({ ...conciliation, history });
 });

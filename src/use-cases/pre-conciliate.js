@@ -36,7 +36,8 @@ export class PreConciliateUseCase {
           data_emissao: t.data_emissao,
           valor_residual: toNumber(outstandingBefore),
           valor_recebido: toNumber(settlementValue),
-          valor_total: toNumber(outstandingAfter)
+          valor_total: toNumber(outstandingAfter),
+          id_extrato_banco: t.id_extrato_banco
         });
 
         account.valor_residual = toNumber(outstandingAfter);

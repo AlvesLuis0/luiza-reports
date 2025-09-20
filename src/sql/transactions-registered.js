@@ -1,1 +1,5 @@
-export const transactionsRegisteredSql = 'SELECT identificador AS identifiers FROM titulos_cr_baixas_ofx';
+export const transactionsRegisteredSql = `
+  SELECT id_extrato_banco AS identifiers
+  FROM extrato_banco
+  WHERE situacao = 'N'
+`;

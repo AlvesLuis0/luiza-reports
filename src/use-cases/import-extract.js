@@ -27,7 +27,7 @@ export class ImportExtractUseCase {
         data_emissao: parseOfxDate(transaction.DTPOSTED),
         descricao: transaction.MEMO,
         documento: transaction.CHECKNUM,
-        identificador: transaction.FITID,
+        id_extrato_banco: transaction.FITID,
         tipo: transaction.TRNTYPE,
         valor: parseFloat(transaction.TRNAMT),
       });

@@ -44,6 +44,8 @@ class DineroInput {
 const defaultColumnConfig = { orderable: false, searchable: false };
 const selectedCustomerTotal = new DineroInput('#selected-customer-total', 0);
 const selectedTransactionsTotal = new DineroInput('#selected-extract-total', 0);
+const modal = new bootstrap.Modal('#conciliator-modal', {});
+var conciliation = {};
 
 
 // tabelas
@@ -132,7 +134,7 @@ extractTable.on('deselect', function (_, dt, _, indexes) {
   changeSelectedTransactionsTotal(-data.valor);
 });
 
-$('#action-btn').on('click', function() {
+$('#open-pre-conciliation').on('click', function() {
   if(selectedTransactionsTotal.getDinero().isZero() || selectedCustomerTotal.getDinero().isZero()) return alert('Selecione pelo menos um cliente e um valor do extrato.');
   if(selectedTransactionsTotal.getDinero().greaterThan(selectedCustomerTotal.getDinero())) return alert('O valor residual do cliente deve ser maior ou igual ao total selecionado do extrato.');
 
@@ -146,12 +148,18 @@ $('#action-btn').on('click', function() {
     contentType: 'application/json',
     processData: false,
     success: function(response) {
+      conciliation = response;
       historyTable
         .clear()
         .rows.add(response.history)
         .draw();
-      const modal = new bootstrap.Modal('#conciliator-modal', {});
       modal.show();
     }
   })
+});
+
+$('#confirm-conciliation').on('click', function() {
+  console.log(conciliation);
+  conciliation = {};
+  modal.hide();
 });

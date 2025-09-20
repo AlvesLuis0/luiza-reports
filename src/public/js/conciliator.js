@@ -71,11 +71,8 @@ const historyTable = new DataTable('#history-table', {
   ordering: false,
   searching: false,
   paging: false,
+  rowGroup: { dataSrc: (row) => `${row.id_cliente} - ${row.razao_social} | Lancto: ${row.id_titulo_cr} | Vencimento: ${formatDate(row.data_vencimento)}` },
   columns: [
-    { data: 'id_cliente' },
-    { data: 'razao_social' },
-    { data: 'id_titulo_cr' },
-    { data: 'data_vencimento', render: formatDate },
     { data: 'data_emissao', render: formatDate },
     { data: 'valor_residual', render: formatCurrency },
     { data: 'valor_recebido', render: formatCurrency },
@@ -136,8 +133,8 @@ extractTable.on('deselect', function (_, dt, _, indexes) {
 });
 
 $('#action-btn').on('click', function() {
-  if(selectedTransactionsTotal.getDinero().isZero() || selectedCustomerTotal.getDinero().isZero()) return;
-  if(selectedTransactionsTotal.getDinero().greaterThan(selectedCustomerTotal.getDinero())) return;
+  if(selectedTransactionsTotal.getDinero().isZero() || selectedCustomerTotal.getDinero().isZero()) return alert('Selecione pelo menos um cliente e um valor do extrato.');
+  if(selectedTransactionsTotal.getDinero().greaterThan(selectedCustomerTotal.getDinero())) return alert('O valor residual do cliente deve ser maior ou igual ao total selecionado do extrato.');
 
   const customer = pendingCustomersTable.row({ selected: true }).data();
   const transactions = extractTable.rows({ selected: true }).data().toArray();

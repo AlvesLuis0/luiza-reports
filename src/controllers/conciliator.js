@@ -5,6 +5,7 @@ import { Database } from '../services/database.js';
 import { transactionsRegisteredSql } from '../sql/transactions-registered.js';
 import { PreConciliateUseCase } from '../use-cases/pre-conciliate.js';
 import { pendingCustomersSql } from '../sql/pending-customers.js';
+import { ConciliateUseCase } from '../use-cases/conciilate.js';
 
 export const conciliatorController = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -35,4 +36,16 @@ conciliatorController.post('/pre-conciliate', async(req, res) => {
   const preConciliate = new PreConciliateUseCase(conciliation.customer, conciliation.transactions);
   const history = await preConciliate.execute();
   res.json({ ...conciliation, history });
+});
+
+conciliatorController.post('/conciliate', async(req, res) => {
+  const conciliation = req.body;
+  const conciliate = new ConciliateUseCase(conciliation.history, conciliation.transactions);
+  try {
+    const ids = await conciliate.execute();
+    const message = `Baixas criadas: ${ids.join(', ')}`;
+    res.json({ message });
+  } catch(e) {
+    res.status(500).json({ message: e.message });
+  }
 });

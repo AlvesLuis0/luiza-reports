@@ -1,4 +1,18 @@
 // utils
+async function reloadCustomers() {
+  $.ajax({
+    url: '/conciliator/pending-customers',
+    type: 'GET',
+    success: (response) => {
+      selectedCustomerTotal.setValue(0);
+      pendingCustomersTable
+        .clear()
+        .rows.add(response)
+        .draw();
+    }
+  });
+}
+
 function formatCurrency(value) {
   return value.toLocaleString('pt-BR', {
     style: 'currency',
@@ -84,17 +98,7 @@ const historyTable = new DataTable('#history-table', {
 
 
 // início
-$.ajax({
-  url: '/conciliator/pending-customers',
-  type: 'GET',
-  success: (response) => {
-    selectedCustomerTotal.setValue(0);
-    pendingCustomersTable
-      .clear()
-      .rows.add(response)
-      .draw();
-  }
-});
+reloadCustomers();
 
 
 // listeners
@@ -155,11 +159,31 @@ $('#open-pre-conciliation').on('click', function() {
         .draw();
       modal.show();
     }
-  })
+  });
 });
 
 $('#confirm-conciliation').on('click', function() {
-  console.log(conciliation);
-  conciliation = {};
-  modal.hide();
+  $.ajax({
+    url: '/conciliator/conciliate',
+    type: 'POST',
+    data: JSON.stringify(conciliation),
+    contentType: 'application/json',
+    processData: false,
+    success: function(response) {
+      console.log(response);
+      conciliation = {};
+      modal.hide();
+      reloadCustomers();
+      extractTable
+        .rows({ selected: true })
+        .remove()
+        .draw();
+      selectedTransactionsTotal.setValue(0);
+      alert(response.message);
+    },
+    error: function(response) {
+      console.error(response);
+      alert(response.responseJSON.message);
+    }
+  });
 });

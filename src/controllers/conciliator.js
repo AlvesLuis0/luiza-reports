@@ -5,7 +5,7 @@ import { Database } from '../services/database.js';
 import { transactionsRegisteredSql } from '../sql/transactions-registered.js';
 import { PreConciliateUseCase } from '../use-cases/pre-conciliate.js';
 import { pendingCustomersSql } from '../sql/pending-customers.js';
-import { ConciliateUseCase } from '../use-cases/conciilate.js';
+import { ConciliateUseCase } from '../use-cases/conciliate.js';
 
 export const conciliatorController = Router();
 const upload = multer({ storage: multer.memoryStorage() });
